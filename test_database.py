@@ -19,7 +19,7 @@ from models.enums import (
 
 db = SessionLocal()
 
-# Create Driver User
+# Creating Driver
 driver_user = User(
     name="David",
     email="david@example.com",
@@ -31,7 +31,7 @@ db.add(driver_user)
 db.commit()
 db.refresh(driver_user)
 
-# Create Driver Profile
+# Creating Driver's Profile
 driver = Driver(
     user_id=driver_user.id,
     license_number="LIC12345",
@@ -42,7 +42,7 @@ db.add(driver)
 db.commit()
 db.refresh(driver)
 
-# Create Passenger
+# Creating Passenger
 passenger = User(
     name="John",
     email="john@example.com",
@@ -54,7 +54,7 @@ db.add(passenger)
 db.commit()
 db.refresh(passenger)
 
-# Create Vehicle
+# Creating Vehicle
 vehicle = Vehicle(
     plate_number="ABC-123",
     capacity=4,
@@ -65,7 +65,7 @@ db.add(vehicle)
 db.commit()
 db.refresh(vehicle)
 
-# Create Route
+# Creating Route
 route = Route(
     origin="Abuja",
     destination="Lagos",
@@ -77,7 +77,7 @@ db.add(route)
 db.commit()
 db.refresh(route)
 
-# Create Trip
+# Creating Trip
 trip = Trip(
     route_id=route.id,
     vehicle_id=vehicle.id,
@@ -91,7 +91,7 @@ db.add(trip)
 db.commit()
 db.refresh(trip)
 
-# Create Booking
+# Creating Booking
 booking = Booking(
     user_id=passenger.id,
     trip_id=trip.id,
