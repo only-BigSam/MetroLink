@@ -1,0 +1,106 @@
+from datetime import datetime
+
+from database.session import SessionLocal
+
+from models.user import User
+from models.driver import Driver
+from models.vehicle import Vehicle
+from models.route import Route
+from models.trip import Trip
+from models.booking import Booking
+
+from models.enums import (
+    UserRole,
+    VehicleStatus,
+    TripStatus,
+    BookingStatus
+)
+
+
+db = SessionLocal()
+
+# Create Driver User
+driver_user = User(
+    name="David",
+    email="david@example.com",
+    password_hash="hashed_password",
+    role=UserRole.DRIVER
+)
+
+db.add(driver_user)
+db.commit()
+db.refresh(driver_user)
+
+# Create Driver Profile
+driver = Driver(
+    user_id=driver_user.id,
+    license_number="LIC12345",
+    phone_number="08012345678"
+)
+
+db.add(driver)
+db.commit()
+db.refresh(driver)
+
+# Create Passenger
+passenger = User(
+    name="John",
+    email="john@example.com",
+    password_hash="hashed_password",
+    role=UserRole.PASSENGER
+)
+
+db.add(passenger)
+db.commit()
+db.refresh(passenger)
+
+# Create Vehicle
+vehicle = Vehicle(
+    plate_number="ABC-123",
+    capacity=4,
+    status=VehicleStatus.AVAILABLE
+)
+
+db.add(vehicle)
+db.commit()
+db.refresh(vehicle)
+
+# Create Route
+route = Route(
+    origin="Abuja",
+    destination="Lagos",
+    distance=750.5,
+    fare=15000
+)
+
+db.add(route)
+db.commit()
+db.refresh(route)
+
+# Create Trip
+trip = Trip(
+    route_id=route.id,
+    vehicle_id=vehicle.id,
+    driver_id=driver.id,
+    departure_time=datetime.utcnow(),
+    arrival_time=datetime.utcnow(),
+    status=TripStatus.SCHEDULED
+)
+
+db.add(trip)
+db.commit()
+db.refresh(trip)
+
+# Create Booking
+booking = Booking(
+    user_id=passenger.id,
+    trip_id=trip.id,
+    status=BookingStatus.CONFIRMED
+)
+
+db.add(booking)
+db.commit()
+
+print("Database test completed successfully!")
+
+db.close()
