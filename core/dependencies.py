@@ -5,15 +5,18 @@ from jose import JWTError, jwt
 from database.session import SessionLocal
 from models.user import User
 from core.security import SECRET_KEY, ALGORITHM
+from models.enums import UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login"
+    tokenUrl="/auth/token"
 )
 
 
 def get_current_user(
     token: str = Depends(oauth2_scheme)
 ):
+    print("TOKEN RECEIVED:", token)
+
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials"
@@ -44,3 +47,20 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+def get_current_admin(
+    current_user: User = Depends(
+        get_current_user
+    )
+):
+    print(current_user.role)
+    print(type(current_user.role))
+    print(UserRole.ADMIN)
+
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized"
+        )
+
+    return current_user
