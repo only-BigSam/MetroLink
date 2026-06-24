@@ -6,7 +6,7 @@ from database.session import get_db
 from models.enums import VehicleStatus
 from models.user import User
 from models.vehicle import Vehicle
-from schemas.vehicles import VehicleCreate, VehicleResponse
+from schemas.vehicles import VehicleCreate, VehicleResponse, VehicleStatusUpdate
 
 router = APIRouter(
     prefix="/vehicles",
@@ -43,3 +43,68 @@ def create_vehicle(
     db.refresh(new_vehicle)
 
     return new_vehicle
+
+@router.get(
+    "",
+    response_model=list[VehicleResponse]
+)
+def get_vehicles(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(
+        get_current_admin
+    )
+):
+    vehicles = db.query(
+        Vehicle
+    ).all()
+
+    return vehicles
+
+@router.get(
+    "/{vehicle_id}",
+    response_model=VehicleResponse
+)
+def get_vehicle(
+    vehicle_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(
+        get_current_admin
+    )
+):
+    vehicle = db.query(Vehicle).filter(
+        Vehicle.id == vehicle_id).first()
+
+    if not vehicle:
+        raise HTTPException(
+            status_code=404,
+            detail="Vehicle not found"
+        )
+
+    return vehicle
+
+@router.patch(
+    "/{vehicle_id}/status",
+    response_model=VehicleResponse
+)
+def update_vehicle_status(
+    vehicle_id: int,
+    status_data: VehicleStatusUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(
+        get_current_admin
+    )
+):
+    vehicle = db.query(Vehicle).filter(
+    Vehicle.id == vehicle_id).first()
+    if not vehicle:
+        raise HTTPException(
+            status_code=404,
+            detail="Vehicle not found"
+        )
+
+    vehicle.status = status_data.status
+
+    db.commit()
+    db.refresh(vehicle)
+
+    return vehicle

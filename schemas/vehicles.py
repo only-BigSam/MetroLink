@@ -15,3 +15,6 @@ class VehicleResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class VehicleStatusUpdate(BaseModel):
+    status: VehicleStatus
