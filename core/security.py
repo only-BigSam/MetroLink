@@ -1,4 +1,17 @@
+from datetime import datetime, timedelta
+from os import getenv
+
+from dotenv import load_dotenv
+from jose import jwt
 from passlib.context import CryptContext
+
+load_dotenv()
+
+SECRET_KEY = getenv("SECRET_KEY")
+ALGORITHM = getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+)
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -17,4 +30,22 @@ def verify_password(
     return pwd_context.verify(
         plain_password,
         hashed_password
+    )
+
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    to_encode.update({
+        "exp": expire
+    })
+
+    return jwt.encode(
+        to_encode,
+        SECRET_KEY,
+        algorithm=ALGORITHM
     )
