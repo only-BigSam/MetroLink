@@ -42,6 +42,7 @@ class Trip(Base):
 
     status: Mapped[TripStatus] = mapped_column(
         Enum(TripStatus),
+        default=TripStatus.SCHEDULED,
         nullable=False
     )
 
@@ -72,6 +73,6 @@ class Trip(Base):
     )
 
     bookings = relationship(
-    "Booking",
-    back_populates="trip"
-)
+        "Booking",
+        back_populates="trip"
+    )

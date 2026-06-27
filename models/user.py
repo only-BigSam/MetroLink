@@ -53,4 +53,3 @@ class User(Base):
 
     bookings = relationship(
         "Booking",back_populates="user")
-    
