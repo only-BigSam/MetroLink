@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from models.enums import VehicleStatus
 
 
@@ -10,7 +10,7 @@ class VehicleCreate(BaseModel):
 class VehicleResponse(BaseModel):
     id: int
     plate_number: str
-    capacity: int
+    capacity: int = Field(ge=1, le=6)
     status: VehicleStatus
 
     class Config:

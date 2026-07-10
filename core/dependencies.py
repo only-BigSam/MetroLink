@@ -64,3 +64,22 @@ def get_current_admin(
         )
 
     return current_user
+
+def get_current_driver(
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != UserRole.DRIVER:
+        raise HTTPException(
+            status_code=403,
+            detail="Driver access required"
+        )
+
+    driver = current_user.driver
+
+    if not driver:
+        raise HTTPException(
+            status_code=404,
+            detail="Driver profile not found"
+        )
+
+    return driver

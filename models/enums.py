@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class UserRole(str, Enum):
-    ADMIN = "admin"
-    PASSENGER = "passenger"
-    DRIVER = "driver"
+    ADMIN = "ADMIN"
+    PASSENGER = "PASSENGER"
+    DRIVER = "DRIVER"
 
 
 class VehicleStatus(str, Enum):
@@ -14,13 +14,14 @@ class VehicleStatus(str, Enum):
 
 
 class TripStatus(str, Enum):
-    SCHEDULED = "scheduled"
-    IN_TRANSIT = "in_transit"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    SCHEDULED = "SCHEDULED"
+    IN_TRANSIT = "IN_TRANSIT"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
 
 
 class BookingStatus(str, Enum):
-    PENDING = "pending"
-    CONFIRMED = "confirmed"
-    CANCELLED = "cancelled"
+    PENDING = "PENDING"
+    CONFIRMED = "CONFIRMED"
+    CANCELLED = "CANCELLED"
+    COMPLETED = "COMPLETED"

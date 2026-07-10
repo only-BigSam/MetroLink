@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -25,17 +25,16 @@ class Booking(Base):
         nullable=False
     )
 
-    status: Mapped[BookingStatus] = mapped_column(
-        Enum(BookingStatus),
+    seats_booked: Mapped[int] = mapped_column(
+        Integer,
         nullable=False
     )
 
-    booking_date: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow
+    status: Mapped[BookingStatus] = mapped_column(
+        Enum(BookingStatus),
+        default=BookingStatus.CONFIRMED,
+        nullable=False
     )
-
-    seats_booked: int
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,

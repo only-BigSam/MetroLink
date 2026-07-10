@@ -82,8 +82,8 @@ trip = Trip(
     route_id=route.id,
     vehicle_id=vehicle.id,
     driver_id=driver.id,
-    departure_time=datetime.utcnow(),
-    arrival_time=datetime.utcnow(),
+    departure_time=datetime.now(),
+    arrival_time=datetime.now(),
     status=TripStatus.SCHEDULED
 )
 
