@@ -15,7 +15,6 @@ oauth2_scheme = OAuth2PasswordBearer(
 def get_current_user(
     token: str = Depends(oauth2_scheme)
 ):
-    print("TOKEN RECEIVED:", token)
 
     credentials_exception = HTTPException(
         status_code=401,
@@ -53,10 +52,6 @@ def get_current_admin(
         get_current_user
     )
 ):
-    print(current_user.role)
-    print(type(current_user.role))
-    print(UserRole.ADMIN)
-
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=403,

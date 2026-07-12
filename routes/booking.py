@@ -1,18 +1,17 @@
 from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from database.session import get_db
-from core.dependencies import get_current_user
+from core.dependencies import get_current_user, get_current_admin
 
 from models.booking import Booking
 from models.trip import Trip
 from models.user import User
 from models.enums import BookingStatus, TripStatus
 
-from schemas.booking import BookingCreate, BookingResponse, BookingDetailedResponse
+from schemas.booking import BookingCreate, BookingResponse, BookingDetailedResponse, AdminBookingResponse
 
 router = APIRouter(
     prefix="/bookings",
@@ -103,3 +102,64 @@ def get_my_bookings(
     )
     for booking in bookings
 ]
+
+@router.get(
+    "/",
+    response_model=list[AdminBookingResponse]
+)
+def get_all_bookings(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    bookings = db.query(Booking).all()
+
+    return [
+        AdminBookingResponse(
+            id=booking.id,
+            passenger_name=booking.user.name,
+            passenger_email=booking.user.email,
+            route_name=f"{booking.trip.route.origin} → {booking.trip.route.destination}",
+            departure_time=booking.trip.departure_time,
+            seats_booked=booking.seats_booked,
+            booking_status=booking.status,
+            trip_status=booking.trip.status
+        )
+        for booking in bookings
+    ]
+
+@router.patch("/{booking_id}/cancel")
+def cancel_booking(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id
+    ).first()
+
+    if not booking:
+        raise HTTPException(
+            status_code=404,
+            detail="Booking not found"
+        )
+
+    if booking.status == BookingStatus.CANCELLED:
+        raise HTTPException(
+            status_code=400,
+            detail="Booking has already been cancelled"
+        )
+
+    if booking.trip.status == TripStatus.COMPLETED:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot cancel a booking for a completed trip"
+        )
+
+    booking.status = BookingStatus.CANCELLED
+
+    db.commit()
+    db.refresh(booking)
+
+    return {
+        "message": "Booking cancelled successfully"
+    }

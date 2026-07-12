@@ -9,10 +9,11 @@ from models.trip import Trip
 from models.user import User, UserRole
 from models.vehicle import Vehicle, VehicleStatus
 from schemas.trip import TripCreate, TripResponse, TripStatus, TripStatusUpdate
-from core.dependencies import get_current_driver
-from models.booking import Booking
-from models.enums import BookingStatus
 from models.driver import Driver
+from models.enums import BookingStatus
+from schemas.trip import TripStatisticsResponse
+from sqlalchemy import func
+from models.booking import Booking
 
 router = APIRouter(
     prefix="/trips",
@@ -199,11 +200,14 @@ def update_trip_status(
 
     return trip
 
-@router.patch("/{trip_id}/start")
-def start_trip(
+@router.get(
+    "/{trip_id}/statistics",
+    response_model=TripStatisticsResponse
+)
+def get_trip_statistics(
     trip_id: int,
     db: Session = Depends(get_db),
-    current_driver: User = Depends(get_current_driver)
+    current_admin: User = Depends(get_current_admin)
 ):
     trip = db.query(Trip).filter(
         Trip.id == trip_id
@@ -215,80 +219,24 @@ def start_trip(
             detail="Trip not found"
         )
 
-    if trip.driver_id != current_driver.id:
-        raise HTTPException(
-            status_code=403,
-            detail="You are not assigned to this trip"
+    booked_seats = db.query(
+        func.sum(Booking.seats_booked)
+    ).filter(
+        Booking.trip_id == trip_id,
+        Booking.status.in_(
+            [BookingStatus.CONFIRMED, BookingStatus.COMPLETED]
         )
+    ).scalar() or 0
 
-    if trip.status != TripStatus.SCHEDULED:
-        raise HTTPException(
-            status_code=400,
-            detail="Trip cannot be started"
-        )
+    total_bookings = db.query(Booking).filter(
+        Booking.trip_id == trip_id
+    ).count()
 
-    current_time = datetime.now()
-
-    if current_time < trip.departure_time:
-        raise HTTPException(
-            status_code=400,
-            detail="You cannot start this trip before its scheduled departure time."
-        )
-
-    trip.status = TripStatus.IN_TRANSIT
-    trip.vehicle.status = VehicleStatus.IN_USE
-
-    db.commit()
-    db.refresh(trip)
-
-    return {
-        "message": "Trip started successfully",
-        "trip_status": trip.status
-    }
-
-@router.patch("/{trip_id}/complete")
-def complete_trip(
-    trip_id: int,
-    db: Session = Depends(get_db),
-    current_driver: Driver = Depends(get_current_driver)
-):
-    trip = db.query(Trip).filter(
-        Trip.id == trip_id
-    ).first()
-
-    if not trip:
-        raise HTTPException(
-            status_code=404,
-            detail="Trip not found"
-        )
-
-    if trip.driver_id != current_driver.id:
-        raise HTTPException(
-            status_code=403,
-            detail="You are not assigned to this trip"
-        )
-
-    if trip.status != TripStatus.IN_TRANSIT:
-        raise HTTPException(
-            status_code=400,
-            detail="Only trips in transit can be completed"
-        )
-
-    trip.status = TripStatus.COMPLETED
-    trip.vehicle.status = VehicleStatus.AVAILABLE
-
-    bookings = db.query(Booking).filter(
-        Booking.trip_id == trip.id,
-        Booking.status == BookingStatus.CONFIRMED
-    ).all()
-
-    for booking in bookings:
-        booking.status = BookingStatus.COMPLETED
-
-    db.commit()
-    db.refresh(trip)
-
-    return {
-        "message": "Trip completed successfully",
-        "trip_status": trip.status
-    }
+    return TripStatisticsResponse(
+        trip_id=trip.id,
+        trip_status=trip.status,
+        vehicle_capacity=trip.vehicle.capacity,
+        booked_seats=booked_seats,
+        available_seats=trip.vehicle.capacity - booked_seats,
+        total_bookings=total_bookings
+    )

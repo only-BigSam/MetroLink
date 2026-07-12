@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from models.enums import BookingStatus, TripStatus
 
@@ -37,3 +37,34 @@ class BookingDetailedResponse(BaseModel):
 
 class BookingStatusUpdate(BaseModel):
     status: BookingStatus
+
+class DriverPassengerResponse(BaseModel):
+    booking_id: int
+    passenger_name: str
+    passenger_email: str
+    seats_booked: int
+    booking_status: BookingStatus
+
+    model_config = ConfigDict(from_attributes=True)
+
+from pydantic import BaseModel, ConfigDict
+
+class TripPassengerResponse(BaseModel):
+    booking_id: int
+    passenger_name: str
+    passenger_email: str
+    seats_booked: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AdminBookingResponse(BaseModel):
+    id: int
+    passenger_name: str
+    passenger_email: str
+    route_name: str
+    departure_time: datetime
+    seats_booked: int
+    booking_status: BookingStatus
+    trip_status: TripStatus
+
+    model_config = ConfigDict(from_attributes=True)
