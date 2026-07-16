@@ -174,10 +174,12 @@ class LoginPage:
         password = self.password_entry.get()
 
         if not email or not password:
+
             self.message_label.configure(
                 text="Please fill in all fields.",
                 text_color="red"
             )
+
             return
 
         response = self.api.login(email, password)
@@ -189,13 +191,21 @@ class LoginPage:
                 text_color="green"
             )
 
-            AdminDashboard(self.root)
+            AdminDashboard(
+                self.root,
+                self.api
+            )
 
         else:
 
             try:
-                message = response.json().get("detail", "Login failed.")
+                message = response.json().get(
+                    "detail",
+                    "Login failed."
+                )
+
             except Exception:
+
                 message = "Unable to contact server."
 
             self.message_label.configure(
