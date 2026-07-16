@@ -1,0 +1,17 @@
+BASE_URL = "http://127.0.0.1:8000"
+
+# Colors
+BACKGROUND = "#FFFFFF"
+
+PRIMARY = "#F58220"
+PRIMARY_HOVER = "#D96D00"
+
+TEXT = "#222222"
+SECONDARY_TEXT = "#666666"
+
+FRAME = "#F8F8F8"
+
+# Fonts
+TITLE_FONT = ("Arial", 36, "bold")
+SUBTITLE_FONT = ("Arial", 18)
+BUTTON_FONT = ("Arial", 15, "bold")
