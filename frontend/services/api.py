@@ -41,3 +41,17 @@ class APIClient:
         )
 
         return response
+    
+    def patch(self, endpoint, data):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        response = requests.patch(
+            f"{BASE_URL}{endpoint}",
+            json=data,
+            headers=headers
+        )
+
+        return response

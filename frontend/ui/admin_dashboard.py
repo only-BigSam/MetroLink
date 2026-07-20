@@ -1,7 +1,8 @@
 import customtkinter as ctk
 from services.api import APIClient
 from config import BACKGROUND, PRIMARY, PRIMARY_HOVER
-
+from widgets.table import DataTable
+from ui.role_dialog import RoleDialog
 
 class AdminDashboard:
 
@@ -137,7 +138,38 @@ class AdminDashboard:
         title.pack(
             anchor="nw",
             padx=30,
-            pady=(30, 15)
+            pady=(30, 10)
+        )
+
+        top_bar = ctk.CTkFrame(
+            self.content,
+            fg_color="transparent"
+        )
+
+        top_bar.pack(
+            fill="x",
+            padx=30,
+            pady=(0, 15)
+        )
+
+        self.search_entry = ctk.CTkEntry(
+            top_bar,
+            width=250,
+            placeholder_text="Search users..."
+        )
+
+        self.search_entry.pack(
+            side="left"
+        )
+
+        refresh_button = ctk.CTkButton(
+            top_bar,
+            text="Refresh",
+            command=self.show_users
+        )
+
+        refresh_button.pack(
+            side="right"
         )
 
         response = self.api.get("/users")
@@ -147,62 +179,97 @@ class AdminDashboard:
             error = ctk.CTkLabel(
                 self.content,
                 text="Unable to load users.",
-                text_color="red",
-                font=("Arial", 16)
+                text_color="red"
             )
 
-            error.pack(
-                anchor="nw",
-                padx=30
-            )
+            error.pack()
 
             return
 
-        users = response.json()
+        self.users = response.json()
+
+        self.table = DataTable(
+            self.content,
+            columns=[
+                "ID",
+                "Name",
+                "Email",
+                "Role"
+            ]
+        )
+
+        self.table.pack(
+            fill="x",
+            padx=30
+        )
+
+        self.populate_users(self.users)
+
+        self.search_entry.bind(
+            "<KeyRelease>",
+            self.filter_users
+        )
+
+    def populate_users(self, users):
+
+        for widget in self.table.body.winfo_children():
+            widget.destroy()
+
+        self.table.row_count = 0
 
         for user in users:
 
-            row = ctk.CTkFrame(
-                self.content
+            self.table.add_row(
+                [
+                    user["id"],
+                    user["name"],
+                    user["email"],
+                    user["role"]
+                ],
+                action=lambda u=user: self.edit_user_role(u)
             )
 
-            row.pack(
-                fill="x",
-                padx=30,
-                pady=5
-            )
+    def edit_user_role(self, user):
 
-            ctk.CTkLabel(
-                row,
-                text=f"{user['id']}"
-            ).pack(
-                side="left",
-                padx=10
-            )
+        RoleDialog(
+            self.root,
+            user,
+            self.save_user_role
+        )
 
-            ctk.CTkLabel(
-                row,
-                text=user["name"]
-            ).pack(
-                side="left",
-                padx=20
-            )
+    def save_user_role(self, user, new_role):
 
-            ctk.CTkLabel(
-                row,
-                text=user["email"]
-            ).pack(
-                side="left",
-                padx=20
-            )
+        response = self.api.patch(
+            f"/users/{user['id']}/role",
+            {
+                "role": new_role.upper()
+            }
+        )
 
-            ctk.CTkLabel(
-                row,
-                text=user["role"]
-            ).pack(
-                side="right",
-                padx=20
-            )
+        if response.status_code == 200:
+
+            self.show_users()
+
+        else:
+
+            print(response.text)
+
+    def filter_users(self, event=None):
+
+        search = self.search_entry.get().lower()
+
+        filtered = []
+
+        for user in self.users:
+
+            if (
+                search in user["name"].lower()
+                or search in user["email"].lower()
+                or search in user["role"].lower()
+            ):
+                filtered.append(user)
+
+        self.populate_users(filtered)
 
     def show_drivers(self):
 
