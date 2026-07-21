@@ -8,10 +8,9 @@ from models.route import Route
 from models.trip import Trip
 from models.user import User, UserRole
 from models.vehicle import Vehicle, VehicleStatus
-from schemas.trip import TripCreate, TripResponse, TripStatus, TripStatusUpdate
+from schemas.trip import TripCreate,TripResponse,TripStatus,TripStatusUpdate,AdminTripResponse,TripStatisticsResponse
 from models.driver import Driver
 from models.enums import BookingStatus
-from schemas.trip import TripStatisticsResponse
 from sqlalchemy import func
 from models.booking import Booking
 
@@ -125,17 +124,31 @@ def create_trip(
 
 @router.get(
     "",
-    response_model=list[TripResponse]
+    response_model=list[AdminTripResponse]
 )
 def get_trips(
     db: Session = Depends(get_db),
-    current_admin: User = Depends(
-        get_current_admin
-    )
+    current_admin: User = Depends(get_current_admin)
 ):
     trips = db.query(Trip).all()
 
-    return trips
+    result = []
+
+    for trip in trips:
+
+        result.append(
+            AdminTripResponse(
+                id=trip.id,
+                route=f"{trip.route.origin} → {trip.route.destination}",
+                driver=trip.driver.user.name,
+                vehicle=trip.vehicle.plate_number,
+                departure_time=trip.departure_time,
+                arrival_time=trip.arrival_time,
+                status=trip.status
+            )
+        )
+
+    return result
 
 @router.get(
     "/{trip_id}",
