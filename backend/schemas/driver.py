@@ -10,15 +10,6 @@ class DriverCreate(BaseModel):
 class DriverResponse(BaseModel):
     id: int
     user_id: int
-    license_number: str
-    phone_number: str
-
-    class Config:
-        from_attributes = True
-
-class DriverResponse(BaseModel):
-    id: int
-    user_id: int
     name: str
     email: str
     license_number: str

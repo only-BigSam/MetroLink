@@ -150,6 +150,28 @@ def get_trips(
 
     return result
 
+@router.get("/available")
+def get_available_trips(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    trips = db.query(Trip).filter(
+        Trip.status == TripStatus.SCHEDULED
+    ).all()
+
+    return [
+        AdminTripResponse(
+            id=trip.id,
+            route=f"{trip.route.origin} → {trip.route.destination}",
+            driver=trip.driver.user.name,
+            vehicle=trip.vehicle.plate_number,
+            departure_time=trip.departure_time,
+            arrival_time=trip.arrival_time,
+            status=trip.status
+        )
+        for trip in trips
+    ]
+
 @router.get(
     "/{trip_id}",
     response_model=TripResponse

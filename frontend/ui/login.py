@@ -5,6 +5,8 @@ from services.api import APIClient
 from widgets.buttons import PrimaryButton
 from widgets.entries import InputField
 from ui.admin_dashboard import AdminDashboard
+from ui.driver_dashboard import DriverDashboard
+from ui.passenger_dashboard import PassengerDashboard
 
 from config import (
     BACKGROUND,
@@ -185,16 +187,25 @@ class LoginPage:
         response = self.api.login(email, password)
 
         if response.status_code == 200:
+            print(response.json())
 
             self.message_label.configure(
                 text="Login successful!",
                 text_color="green"
             )
 
-            AdminDashboard(
-                self.root,
-                self.api
-            )
+            role = response.json()["role"].lower()
+
+            self.container.destroy()
+
+            if role == "admin":
+                AdminDashboard(self.root, self.api)
+
+            elif role == "driver":
+                DriverDashboard(self.root, self.api)
+
+            elif role == "passenger":
+                PassengerDashboard(self.root, self.api)
 
         else:
 

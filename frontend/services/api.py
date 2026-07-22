@@ -160,3 +160,94 @@ class APIClient:
             f"{BASE_URL}/bookings/{booking_id}/cancel",
             headers=headers
         )
+
+    def get_my_trips(self):
+
+        return self.get("/drivers/me/trips")
+
+
+    def start_trip(self, trip_id):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        return requests.patch(
+            f"{BASE_URL}/drivers/{trip_id}/start",
+            headers=headers
+        )
+
+
+    def complete_trip(self, trip_id):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        return requests.patch(
+            f"{BASE_URL}/drivers/{trip_id}/complete",
+            headers=headers
+        )
+
+
+    def get_trip_passengers(self, trip_id):
+
+        return self.get(
+            f"/drivers/{trip_id}/passengers"
+        )
+
+    def start_trip(self, trip_id):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        return requests.patch(
+            f"{BASE_URL}/drivers/{trip_id}/start",
+            headers=headers
+        )
+
+
+    def complete_trip(self, trip_id):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        return requests.patch(
+            f"{BASE_URL}/drivers/{trip_id}/complete",
+            headers=headers
+        )
+
+    def book_trip(self, trip_id, seats):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        return requests.post(
+            f"{BASE_URL}/bookings",
+            json={
+                "trip_id": trip_id,
+                "seats_booked": seats
+            },
+            headers=headers
+        )
+
+    def get_trips(self):
+    
+        return self.get("/trips/available")
+
+    def get_my_bookings(self):
+        return self.get("/bookings/me")
+
+    def cancel_my_booking(self, booking_id):
+
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        return requests.patch(
+            f"{BASE_URL}/bookings/{booking_id}/cancel-me",
+            headers=headers
+        )

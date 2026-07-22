@@ -163,3 +163,40 @@ def cancel_booking(
     return {
         "message": "Booking cancelled successfully"
     }
+
+@router.patch("/{booking_id}/cancel-me")
+def cancel_my_booking(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.user_id == current_user.id
+    ).first()
+
+    if not booking:
+        raise HTTPException(
+            status_code=404,
+            detail="Booking not found"
+        )
+
+    if booking.status == BookingStatus.CANCELLED:
+        raise HTTPException(
+            status_code=400,
+            detail="Booking has already been cancelled"
+        )
+
+    if booking.trip.status != TripStatus.SCHEDULED:
+        raise HTTPException(
+            status_code=400,
+            detail="This booking can no longer be cancelled"
+        )
+
+    booking.status = BookingStatus.CANCELLED
+
+    db.commit()
+
+    return {
+        "message": "Booking cancelled successfully"
+    }

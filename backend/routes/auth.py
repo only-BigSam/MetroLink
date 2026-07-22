@@ -56,8 +56,9 @@ def login_for_swagger(
     )
 
     return {
-        "access_token": access_token,
-        "token_type": "bearer"
+    "access_token": access_token,
+    "token_type": "bearer",
+    "role": user.role.value
     }
 
 @router.get("/test")
@@ -128,7 +129,8 @@ def login(
     )
     return {
     "access_token": access_token,
-    "token_type": "bearer"
+    "token_type": "bearer",
+    "role": user.role.value
 }
 
 @router.get("/protected-test")

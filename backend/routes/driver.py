@@ -104,7 +104,7 @@ def get_trip_passengers(
         for booking in bookings
     ]
 @router.get(
-    "/drivers/trips/{trip_id}/passengers",
+    "/{trip_id}/passengers",
     response_model=list[DriverPassengerResponse]
 )
 def get_trip_passengers(
@@ -144,7 +144,7 @@ def get_trip_passengers(
     ]
 
 @router.get(
-    "/drivers/me/trips",
+    "/me/trips",
     response_model=list[DriverTripResponse]
 )
 def get_my_trips(
